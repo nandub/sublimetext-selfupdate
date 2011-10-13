@@ -1,0 +1,15 @@
+Install Bash Update Script
+
+curl -s https://raw.github.com/nandub/sublime2-selfupdate/master/sl2update > sl2
+
+chmod 755 sl2
+
+sudo cp -p sl2 /usr/local/bin
+
+Update Sublime Text 2
+
+sl2 <build> [location] - location defaults to $PWD
+
+sl2 2126 $HOME/devtools
+
+and last add $HOME/devtools/sublime2 to your path and execute 'sublime_text' executable.
