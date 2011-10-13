@@ -1,0 +1,34 @@
+#!/bin/bash
+
+build=$1
+location=$2
+url_path=http://c758482.r82.cf2.rackcdn.com/
+file_pattern='Sublime Text 2 Build '
+platform=`uname -i`
+
+export file_get=$file_pattern$build
+
+if [ "${location}" = "" ]
+then
+  location=`pwd`
+fi
+
+if [ "${platform}" != "i386" ]
+then
+  export file_get=$file_get x64
+fi
+export file_get=$file_get.tar.bz2
+
+echo file=$file_get
+
+pushd $location
+
+wget "$url_path$file_get"
+
+echo tar jxvf $file_get
+tar jxvf "$file_get"
+mv "Sublime Text 2" sublime2-$build
+ln -s sublime2-$build sublime2
+rm *.bz2
+
+popd
