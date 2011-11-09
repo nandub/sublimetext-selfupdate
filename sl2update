@@ -3,8 +3,9 @@
 build=$1
 location=$2
 url_path=http://c758482.r82.cf2.rackcdn.com/
-file_pattern='Sublime Text 2 Build '
-platform=`uname -i`
+file_pattern="Sublime Text 2 Build "
+hardware=`uname -m`
+os=`uname -s`
 
 if [ "${build}" = "" ]
 then
@@ -19,19 +20,43 @@ then
   location=`pwd`
 fi
 
-if [ "${platform}" != "i386" ]
+if [ "${hardware}" == "x86_64" ]
 then
-  export file_get='$file_get x64'
+  if [ "${os}" == "Darwin" ]
+  then
+    export file_get=$file_get
+  else
+    export file_get="$file_get x64" 
+  fi
+else
+  export file_get=$file_get
 fi
-export file_get=$file_get.tar.bz2
+
+if [ "${os}" == "Linux" ]
+then
+  export ext=.tar.bz2
+elif [ "${os}" == "Darwin" ]
+then
+  export ext=.dmg
+fi
+export file_get=$file_get$ext
 
 pushd $location
 
 wget "$url_path$file_get"
 
-tar jxvf "$file_get"
-mv "Sublime Text 2" sublime2-$build
-ln -s sublime2-$build sublime2
-rm *.bz2
+if [ "${os}" == "Linux" ]
+then
+  tar jxvf "$file_get"
+  mv "Sublime Text 2" sublime2-$build
+  ln -s sublime2-$build sublime2
+  rm *.bz2
+else
+  hdiutil mount "$file_get"
+  mkdir -p sublime2
+  cp -R "/Volumes/Sublime Text 2/Sublime Text 2.app" "sublime2/Sublime Text 2.app"
+  hdiutil unmount "/Volumes/Sublime Text 2"  
+  rm *.dmg
+fi
 
 popd
