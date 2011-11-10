@@ -53,8 +53,9 @@ then
   rm *.bz2
 else
   hdiutil mount "$file_get"
-  mkdir -p sublime2
-  cp -R "/Volumes/Sublime Text 2/Sublime Text 2.app" "sublime2/Sublime Text 2.app"
+  mkdir -p sublime2-$build
+  cp -R "/Volumes/Sublime Text 2/Sublime Text 2.app" "sublime2-$build/Sublime Text 2.app"
+  ln -s sublime2-$build sublime2
   hdiutil unmount "/Volumes/Sublime Text 2"  
   rm *.dmg
 fi
