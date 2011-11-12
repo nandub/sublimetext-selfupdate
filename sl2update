@@ -1,6 +1,12 @@
 #!/bin/bash
 
 build=$1
+if [ "${build}" -le "2095" ]
+then
+  echo "Sublime Text build 2095 and older have a bug with threading that will cause the editor to crash."
+  echo "Please be sure you are running Sublime Text 2 build 2096 or newer. Older versions had issues with the program crashing when a package was reloaded or removed."
+  exit
+fi
 location=$2
 url_path=http://c758482.r82.cf2.rackcdn.com/
 file_pattern="Sublime Text 2 Build "
