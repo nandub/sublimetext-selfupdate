@@ -1,23 +1,72 @@
+
 #!/bin/bash
 
-build=$1
+usage()
+{
+cat << EOF
+usage: $0 options
+
+Sublime Text 2 build installer.
+
+OPTIONS:
+   -h      Show this message
+   -b      Specify build number
+   -l      Location to install. default: `pwd`
+   -B      Install the Sublime Text 2 TextMate Bundle
+   -I      Install a better icon.
+EOF
+}
+
+build=
+location=`pwd`
+slbundle=false
+better_icon=
+
+while getopts “hb:l:BI” OPTION
+do
+     case $OPTION in
+         h)
+             usage
+             exit 1
+             ;;
+         b)
+             build=$OPTARG
+             ;;
+         l)
+             location=$OPTARG
+             ;;
+         B)
+             slbundle=true
+             ;;
+         I)
+             better_icon=true
+             ;;
+         ?)
+             usage
+             exit
+             ;;
+     esac
+done
+
+if [[ -z ${build} ]] 
+then
+     usage
+     exit 1
+fi
+
 if [ "${build}" -le "2095" ]
 then
   echo "Sublime Text build 2095 and older have a bug with threading that will cause the editor to crash."
   echo "Please be sure you are running Sublime Text 2 build 2096 or newer. Older versions had issues with the program crashing when a package was reloaded or removed."
   exit
 fi
-location=$2
+
 url_path=http://c758482.r82.cf2.rackcdn.com/
 file_pattern="Sublime Text 2 Build "
 hardware=`uname -m`
 os=`uname -s`
 
-if [ "${build}" = "" ]
-then
-  echo "usage: $0 <build> [location]"
-  exit
-fi
+set -u
 
 export file_get=$file_pattern$build
 
@@ -26,9 +75,12 @@ then
   location=`pwd`
 fi
 
-if [ "${hardware}" == "x86_64" ]
+echo location=$location
+echo slbundle=$slbundle
+
+if [ "${hardware}" = "x86_64" ]
 then
-  if [ "${os}" == "Darwin" ]
+  if [ "${os}" = "Darwin" ]
   then
     export file_get=$file_get
   else
@@ -38,10 +90,10 @@ else
   export file_get=$file_get
 fi
 
-if [ "${os}" == "Linux" ]
+if [ "${os}" = "Linux" ]
 then
   export ext=.tar.bz2
-elif [ "${os}" == "Darwin" ]
+elif [ "${os}" = "Darwin" ]
 then
   export ext=.dmg
 fi
@@ -51,19 +103,53 @@ pushd $location
 
 wget "$url_path$file_get"
 
-if [ "${os}" == "Linux" ]
+if [ "${better_icon}" = "true" ]
+then
+  echo "Downloading the better icon."
+  wget http://www.sublimetext.com/forum/download/file.php?id=200 -O better_icon.zip
+  unzip better_icon.zip
+  rm -rf __MACOSX
+  rm better_icon.zip
+  echo "Done."
+fi
+
+if [ "${os}" = "Linux" ]
 then
   tar jxvf "$file_get"
   mv "Sublime Text 2" sublime2-$build
   ln -s sublime2-$build sublime2
   rm *.bz2
+  if [ "${slbundle}" = "true" ]
+  then
+    git clone https://github.com/jashkenas/coffee-script-tmbundle.git
+    pushd coffee-script-tmbundle
+    zip -r CoffeeScript.sublime-package *
+    mv CoffeeScript.sublime-package ~/.Sublime\ Text\ 2/Packages
+    popd
+    rm -rf coffee-script-tmbundle
+  fi
+  if [ "${better_icon}" = "true" ]
+  then
+    echo "Not yet implemented on linux.  Not sure where put the icon file."
+  fi
 else
   hdiutil mount "$file_get"
   mkdir -p sublime2-$build
-  cp -R "/Volumes/Sublime Text 2/Sublime Text 2.app" "sublime2-$build/Sublime Text 2.app"
+  cp -R /Volumes/Sublime\ Text\ 2/Sublime\ Text\ 2.app sublime2-$build/Sublime\ Text\ 2.app
   ln -s sublime2-$build sublime2
-  hdiutil unmount "/Volumes/Sublime Text 2"  
+  hdiutil unmount /Volumes/Sublime\ Text\ 2  
   rm *.dmg
+  if [ "${slbundle}" = "true" ]
+  then 
+    pushd ~/Library/Application\ Support/Sublime\ Text\ 2/Packages
+    git clone https://github.com/jashkenas/coffee-script-tmbundle.git CoffeeScript
+    popd
+  fi
+  if [ "${better_icon}" = "true" ]
+  then
+    cp -p Sublime\ Text\ 2.icns sublime2/Sublime\ Text\ 2.app/Contents/Resources 
+    rm Sublime\ Text\ 2.icns
+  fi
 fi
 
 popd
