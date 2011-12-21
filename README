@@ -8,8 +8,17 @@ sudo cp -p sl2 /usr/local/bin
 
 Update Sublime Text 2
 
-sl2 <build> [location] - location defaults to $PWD
+sl2 -b 2126 -l $HOME/devtools -BIP
 
-sl2 2126 $HOME/devtools
+usage: sl2 options
 
-and last add $HOME/devtools/sublime2 to your path and execute 'sublime_text' executable.
+Sublime Text 2 build installer.
+
+OPTIONS:
+   -h      Show this message
+   -b      Specify build number
+   -l      Location to install. default: /Users/fortiz/Applications on Mac OS X or /Users/fortiz/development/tools/sublime2-selfupdate on Linux (TODO)
+   -B      Install the Sublime Text 2 TextMate Bundle
+   -I      Install a better icon.
+   -P      Install the Sublime Text 2 Package Control Manager
+
