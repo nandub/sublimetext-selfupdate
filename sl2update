@@ -18,9 +18,9 @@ EOF
 }
 
 build=
-location=`pwd`
+location=
 slbundle=false
-better_icon=
+bettericon=
 
 while getopts “hb:l:BI” OPTION
 do
@@ -39,7 +39,7 @@ do
              slbundle=true
              ;;
          I)
-             better_icon=true
+             bettericon=true
              ;;
          ?)
              usage
@@ -70,14 +70,6 @@ set -u
 
 export file_get=$file_pattern$build
 
-if [ "${location}" = "" ]
-then
-  location=`pwd`
-fi
-
-echo location=$location
-echo slbundle=$slbundle
-
 if [ "${hardware}" = "x86_64" ]
 then
   if [ "${os}" = "Darwin" ]
@@ -93,9 +85,18 @@ fi
 if [ "${os}" = "Linux" ]
 then
   export ext=.tar.bz2
+  if [ "${location}" = "" ]
+  then
+    echo TODO: I need to figure where to put this on Linux
+    location=`pwd`
+  fi
 elif [ "${os}" = "Darwin" ]
 then
   export ext=.dmg
+  if [ "${location}" = "" ]
+  then
+    location=~/Applications
+  fi
 fi
 export file_get=$file_get$ext
 
@@ -103,7 +104,7 @@ pushd $location
 
 wget "$url_path$file_get"
 
-if [ "${better_icon}" = "true" ]
+if [ "${bettericon}" = "true" ]
 then
   echo "Downloading the better icon."
   wget http://www.sublimetext.com/forum/download/file.php?id=200 -O better_icon.zip
@@ -128,7 +129,7 @@ then
     popd
     rm -rf coffee-script-tmbundle
   fi
-  if [ "${better_icon}" = "true" ]
+  if [ "${bettericon}" = "true" ]
   then
     echo "Not yet implemented on linux.  Not sure where put the icon file."
   fi
@@ -141,11 +142,14 @@ else
   rm *.dmg
   if [ "${slbundle}" = "true" ]
   then 
-    pushd ~/Library/Application\ Support/Sublime\ Text\ 2/Packages
-    git clone https://github.com/jashkenas/coffee-script-tmbundle.git CoffeeScript
-    popd
+    if [ !-e ~/Library/Application\ Support/Sublime\ Text\ 2/Packages/CoffeeScript ]
+    then
+      pushd ~/Library/Application\ Support/Sublime\ Text\ 2/Packages
+      git clone https://github.com/jashkenas/coffee-script-tmbundle.git CoffeeScript
+      popd
+    fi
   fi
-  if [ "${better_icon}" = "true" ]
+  if [ "${bettericon}" = "true" ]
   then
     cp -p Sublime\ Text\ 2.icns sublime2/Sublime\ Text\ 2.app/Contents/Resources 
     rm Sublime\ Text\ 2.icns
