@@ -11,18 +11,20 @@ Sublime Text 2 build installer.
 OPTIONS:
    -h      Show this message
    -b      Specify build number
-   -l      Location to install. default: `pwd`
+   -l      Location to install. default: $HOME/Applications on Mac OS X or `pwd` on Linux (TODO)
    -B      Install the Sublime Text 2 TextMate Bundle
    -I      Install a better icon.
+   -P      Install the Sublime Text 2 Package Control Manager
 EOF
 }
 
 build=
 location=
-slbundle=false
-bettericon=
+sublimebundle=false
+bettericon=false
+packagecontrol=false
 
-while getopts “hb:l:BI” OPTION
+while getopts “hb:l:BIP” OPTION
 do
      case $OPTION in
          h)
@@ -36,10 +38,13 @@ do
              location=$OPTARG
              ;;
          B)
-             slbundle=true
+             sublimebundle=true
              ;;
          I)
              bettericon=true
+             ;;
+         P)
+             packagecontrol=true
              ;;
          ?)
              usage
@@ -95,7 +100,7 @@ then
   export ext=.dmg
   if [ "${location}" = "" ]
   then
-    location=~/Applications
+    location=$HOME/Applications
   fi
 fi
 export file_get=$file_get$ext
@@ -114,37 +119,61 @@ then
   echo "Done."
 fi
 
+if [ -e sublime2 ]
+then
+  echo An older version was found.  Deleting it.
+  rm -rf sublime2*
+fi
+
 if [ "${os}" = "Linux" ]
 then
   tar jxvf "$file_get"
   mv "Sublime Text 2" sublime2-$build
   ln -s sublime2-$build sublime2
   rm *.bz2
-  if [ "${slbundle}" = "true" ]
+  if [ "${sublimebundle}" = "true" ]
   then
-    git clone https://github.com/jashkenas/coffee-script-tmbundle.git
-    pushd coffee-script-tmbundle
-    zip -r CoffeeScript.sublime-package *
-    mv CoffeeScript.sublime-package ~/.Sublime\ Text\ 2/Packages
-    popd
-    rm -rf coffee-script-tmbundle
+    if [ ! -e $HOME/.Sublime\ Text\ 2/Installed\ Packages/CoffeeScript.sublime-package ]
+    then
+      echo Installing the Sublime Text 2 TextMate Bundle
+      git clone https://github.com/jashkenas/coffee-script-tmbundle.git
+      pushd coffee-script-tmbundle
+      zip -r CoffeeScript.sublime-package *
+      mv CoffeeScript.sublime-package $HOME/.Sublime\ Text\ 2/Installed\ Packages
+      popd
+      rm -rf coffee-script-tmbundle
+    fi
   fi
   if [ "${bettericon}" = "true" ]
   then
     echo "Not yet implemented on linux.  Not sure where put the icon file."
   fi
+  if [ "${packagecontrol}" = "true" ]
+  then
+    if [ ! -e $HOME/.Sublime\ Text\ 2/Installed\ Packages/Package\ Control.sublime-package ]
+    then
+      echo Intalling the Sublime Text 2 Package Control Manager
+      git clone https://github.com/wbond/sublime_package_control.git 
+      pushd sublime_package_control
+      zip -r Package\ Control.sublime-package *
+      mv Package\ Control.sublime-package $HOME/.Sublime\ Text\ 2/Installed\ Packages
+      popd
+      rm -rf sublime_package_control
+    fi
+  fi
 else
   hdiutil mount "$file_get"
   mkdir -p sublime2-$build
-  cp -R /Volumes/Sublime\ Text\ 2/Sublime\ Text\ 2.app sublime2-$build/Sublime\ Text\ 2.app
+  cp -Rp /Volumes/Sublime\ Text\ 2/Sublime\ Text\ 2.app sublime2-$build/Sublime\ Text\ 2.app
   ln -s sublime2-$build sublime2
   hdiutil unmount /Volumes/Sublime\ Text\ 2  
   rm *.dmg
-  if [ "${slbundle}" = "true" ]
+  if [ "${sublimebundle}" = "true" ]
   then 
-    if [ !-e ~/Library/Application\ Support/Sublime\ Text\ 2/Packages/CoffeeScript ]
+    if [ ! -e $HOME/Library/Application\ Support/Sublime\ Text\ 2/Packages/CoffeeScript ]
     then
-      pushd ~/Library/Application\ Support/Sublime\ Text\ 2/Packages
+      echo Installing the Sublime Text 2 TextMate Bundle
+      pushd $HOME/Library/Application\ Support/Sublime\ Text\ 2/Packages
       git clone https://github.com/jashkenas/coffee-script-tmbundle.git CoffeeScript
       popd
     fi
@@ -154,6 +183,19 @@ else
     cp -p Sublime\ Text\ 2.icns sublime2/Sublime\ Text\ 2.app/Contents/Resources 
     rm Sublime\ Text\ 2.icns
   fi
+  if [ "${packagecontrol}" = "true" ]
+  then
+    if [ ! -e $HOME/Library/Application\ Support/Sublime\ Text\ 2/Packages/Package\ Control ]
+    then
+      echo Intalling the Sublime Text 2 Package Control Manager
+      pushd $HOME/Library/Application\ Support/Sublime\ Text\ 2/Packages
+      git clone https://github.com/wbond/sublime_package_control.git Package\ Control
+      popd
+    fi
+  fi
 fi
 
 popd
+
+echo You may need to restart Sublime Text 2 for changes to take effect.
+
