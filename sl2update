@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 usage()
@@ -16,6 +15,18 @@ OPTIONS:
    -I      Install a better icon.
    -P      Install the Sublime Text 2 Package Control Manager
 EOF
+}
+
+function download() {
+  url=$1
+  filename=$2
+
+  echo "curling $url"
+  if [ "$filename" == "1" ]; then
+    curl -O -L $url
+  else
+    curl -L $url -o $filename 
+  fi
 }
 
 build=
@@ -67,7 +78,7 @@ then
 fi
 
 url_path=http://c758482.r82.cf2.rackcdn.com/
-file_pattern="Sublime Text 2 Build "
+file_pattern="Sublime%20Text%202%20Build%20"
 hardware=`uname -m`
 os=`uname -s`
 
@@ -81,7 +92,7 @@ then
   then
     export file_get=$file_get
   else
-    export file_get="$file_get x64" 
+    export file_get="$file_get%20x64" 
   fi
 else
   export file_get=$file_get
@@ -107,12 +118,12 @@ export file_get=$file_get$ext
 
 pushd $location
 
-wget "$url_path$file_get"
+download "$url_path$file_get" 1
 
 if [ "${bettericon}" = "true" ]
 then
   echo "Downloading the better icon."
-  wget http://www.sublimetext.com/forum/download/file.php?id=200 -O better_icon.zip
+  download http://www.sublimetext.com/forum/download/file.php?id=200 better_icon.zip
   unzip better_icon.zip
   rm -rf __MACOSX
   rm better_icon.zip
