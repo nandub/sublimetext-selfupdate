@@ -1,24 +1,25 @@
 Install Bash Update Script
 
-curl -s https://raw.github.com/nandub/sublime2-selfupdate/master/sl2update > sl2
+curl -s https://raw.github.com/nandub/sublimetext-selfupdate/master/sltupdate > sltup
 
-chmod 755 sl2
+chmod 755 sltup
 
 sudo cp -p sl2 /usr/local/bin
 
-Update Sublime Text 2
+Update Sublime Text
 
-sl2 -b 2126 -l $HOME/devtools -BIP
+sltup -b 2126 -l $HOME/devtools -BIPV 2
 
-usage: sl2 options
+usage: sltup options
 
-Sublime Text 2 build installer.
+Sublime Text build installer.
 
 OPTIONS:
    -h      Show this message
    -b      Specify build number
-   -l      Location to install. default: /Users/fortiz/Applications on Mac OS X or /Users/fortiz/development/tools/sublime2-selfupdate on Linux (TODO)
-   -B      Install the Sublime Text 2 TextMate Bundle
+   -l      Location to installxi,. default: $HOME/Applications on Mac OS X or $HOME on Linux (TODO)
+   -B      Install the Sublime Text TextMate Bundle
    -I      Install a better icon.
-   -P      Install the Sublime Text 2 Package Control Manager
+   -P      Install the Sublime Text Package Control Manager
+   -V      Sublime Text build version, default 2.
 
